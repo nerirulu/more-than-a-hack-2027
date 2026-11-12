@@ -21,7 +21,7 @@ ROI_SIZE = 30
 
 PEAK_RADIUS = 20
 
-MAX_JUMP_PX = 15
+MAX_JUMP_PX = 10
 
 # =====================================================
 # LOAD DATA
@@ -427,30 +427,17 @@ for frame_idx in range(
 
     if VALID_DETECTION:
 
-        max_x = int(
-            best_centroid[0]
+        max_x = int(best_centroid[0])
+        max_y = int(best_centroid[1])
+
+        detected_px = x1 + max_x
+        detected_py = y1 + max_y
+
+        print(
+            f"Frame {frame_idx} | "
+            f"ROI centroid=({max_x},{max_y}) | "
+            f"IMG centroid=({detected_px},{detected_py})"
         )
-
-        max_y = int(
-            best_centroid[1]
-        )
-
-    # ROI coordinates -> image coordinates
-
-    detected_px = x1 + max_x
-    detected_py = y1 + max_y
-
-    print(
-        f"Frame {frame_idx} | "
-        f"ROI centroid=({max_x},{max_y}) | "
-        f"IMG centroid=({detected_px},{detected_py})"
-    )
-
-    VALID_DETECTION = (
-        best_centroid is not None
-    )
-
-    if VALID_DETECTION:
 
         tracked_x = max_x
         tracked_y = max_y
@@ -459,6 +446,10 @@ for frame_idx in range(
         tracked_py = detected_py
 
     else:
+
+        print(
+            f"Frame {frame_idx} | NO VALID DETECTION"
+        )
 
         tracked_x = roi.shape[1] // 2
         tracked_y = roi.shape[0] // 2
@@ -521,16 +512,17 @@ for frame_idx in range(
 
     # Detected blob
 
-    cv2.circle(
-        candidate_img,
-        (
-            max_x,
-            max_y
-        ),
-        5,
-        (255,0,0),
-        2
-    )
+    if VALID_DETECTION:
+        cv2.circle(
+            candidate_img,
+            (
+                max_x,
+                max_y
+            ),
+            5,
+            (255,0,0),
+            2
+        )
 
     if VALID_DETECTION:
 

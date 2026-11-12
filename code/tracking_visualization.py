@@ -13,8 +13,8 @@ VIDEO_PATH = "../data/tactical/BAR-ATH_tactical.mp4"
 ATD_PATH = "../data/tactical/BAR-ATH_tactical_atd.txt"
 HOMO_PATH = "../data/tactical/BAR-ATH_tactical_homography.csv"
 
-START_FRAME = 11150
-N_FRAMES = 1000
+START_FRAME = 81000
+N_FRAMES = 1500
 
 MAX_DISTANCE = 0.03
 

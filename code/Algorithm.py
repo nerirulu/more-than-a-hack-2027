@@ -290,6 +290,7 @@ def sanity_check(df, halves=None, initial_team=None, attack_dir=None,
         parts.append(pd.DataFrame({
             "frame_id": frame_ids,
             "half": half,
+            "home_attack_dir": dh,
             "timestamp": sub["timestamp"] if "timestamp" in sub else np.nan,
             "ball_tracked": ~(np.isnan(BX) | np.isnan(BY)),
             "nearest_player": pd.Series(np.where(valid, np.array(ids)[j], 0), dtype="Int64").where(valid),            "nearest_team": tags[np.where(valid, near_team, -1)],
@@ -368,15 +369,3 @@ for k, v in hyp.items():
 t = lab["label_box_team"]
 print("label team == possession:    ", f"{(t == lab['possession_team']).mean():.1%}")
 print("label team == nearest team:  ", f"{(t == lab['nearest_team']).mean():.1%}")
-# ==========================================
-# PASO 3: DETECTAR LOS SET PIECES
-# ==========================================
-
-
-
-
-# ==========================================
-# ==========================================
-# ------- ALGORITMO FINAL -----------------
-# ==========================================
-# ==========================================

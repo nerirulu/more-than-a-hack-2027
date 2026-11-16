@@ -9,6 +9,8 @@ from matplotlib.lines import Line2D
 # ==========================================
 PITCH_LENGTH = 105.0   # metres (coordinates in the df are normalised 0-1)
 PITCH_WIDTH = 68.0
+BOX_DEPTH = 16.5                 # penalty area depth (m)
+BOX_HALF_WIDTH = 20.16
 FPS = 25
 
 HOME_TAG, AWAY_TAG = "H", "A"
@@ -201,6 +203,8 @@ def save_frames(df, frame_ids, out_dir="frames"):
 # and how many players attack / defend in the box. Without chk it only shows detected players.
 
 def animate_frames(df, start_frame, end_frame, chk=None, step=1, save_path=None, close_fig=False):
+    BOX_DEPTH = 16.5                 # penalty area depth (m)
+    BOX_HALF_WIDTH = 20.16 
     """Animate a span of tracking frames.
 
     Info box under the pitch:

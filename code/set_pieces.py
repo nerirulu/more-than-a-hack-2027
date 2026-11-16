@@ -62,16 +62,35 @@ def mask_possession(chk, sp):
     return chk
 
 
-def animate_frames_sp(df, start_frame, end_frame, chk, step=1, save_path=None, **kw):
-    """animate_frames + a red 'SET PIECE (reason)' banner while sp_reason is set (chk from mask_possession)."""
+def animate_frames_sp(df, start_frame, end_frame, chk, step=1, save_path=None,
+                      video_path=None, video_offset=0, **kw):
+    """animate_frames + a red 'SET PIECE (reason)' banner while sp_reason is set + tactical video on the right."""
     anim = animate_frames(df, start_frame, end_frame, chk=chk, step=step, **kw)   # saved below, after wrapping
     ids = df[(df["frame_id"] >= start_frame) & (df["frame_id"] <= end_frame)]["frame_id"].to_numpy()[::step]
     sp = chk.drop_duplicates("frame_id").set_index("frame_id")["sp_reason"].reindex(ids).to_numpy(dtype=object)
 
-    ax = anim._fig.axes[0]
+    fig = anim._fig
+    ax = fig.axes[0]
+    ax.invert_yaxis()
     banner = ax.text(0.5, 0.93, "", transform=ax.transAxes, ha="center", va="center", fontsize=16,
                      weight="bold", color="white", zorder=10, visible=False,
                      bbox=dict(boxstyle="round", facecolor="red", edgecolor="black"))
+
+    if video_path:
+        import imageio.v3 as iio
+        meta = iio.immeta(video_path, plugin="pyav")
+        vid_fps = meta.get("fps", FPS)
+        if abs(vid_fps - FPS) > 0.5:
+            print(f"warning: video fps = {vid_fps:.2f}, tracking fps = {FPS}")
+
+        # Resize figure to 2 panels and move the pitch axes to the left half
+        fig.set_size_inches(22, 8)
+        ax.set_position([0.04, 0.12, 0.43, 0.80])
+        vax = fig.add_axes([0.50, 0.08, 0.48, 0.84])
+        vax.axis("off")
+        vax.set_title("Tactical video")
+        vim = vax.imshow(np.zeros((9, 16, 3), dtype=np.uint8))
+
     draw = anim._func
 
     def func(k):
@@ -79,6 +98,17 @@ def animate_frames_sp(df, start_frame, end_frame, chk, step=1, save_path=None, *
         active = isinstance(sp[k], str)
         banner.set_visible(active)
         banner.set_text(f"SET PIECE ({sp[k]}) - no possession" if active else "")
+
+        if video_path:
+            target = int(ids[k]) + video_offset
+            try:
+                img = iio.imread(video_path, index=target, plugin="pyav")
+                vim.set_data(img)
+                vim.set_extent((0, img.shape[1], img.shape[0], 0))
+            except Exception:
+                pass
+            return (*arts, banner, vim)
+
         return (*arts, banner)
 
     anim._func = func
@@ -138,4 +168,9 @@ chk = sanity_check(df, halves=real_halves)
 sp = detect_set_pieces(df)             # 1. finds the set-piece frames (sp_reason, sp_flag)
 chk = mask_possession(chk, sp)         # 2. adds sp_reason to chk and blanks possession there
 plot_match_timeline(chk); plt.show()
-animate_frames_sp(df, 155000, 160250, chk, step=25, save_path="clip.gif")
+animate_frames_sp(
+    df, 11185, 16185, chk=chk, step=5,
+    video_path="C:/Users/nerir/OneDrive/Escritorio/exps_programacio/more-than-a-hack-2027/data/tactical/BAR-ATH_tactical.mp4",
+    video_offset=0,
+    save_path="comparison_neri.gif"
+)
